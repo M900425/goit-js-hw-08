@@ -66,35 +66,32 @@ const images = [
 
 const galleryList = document.querySelector('.gallery');
 
-images.forEach(image => {
-    const li = document.createElement(`li`);
-    li.classList.add(`gallery-item`);
-    galleryList.appendChild(li);
-    const img = document.createElement(`img`);
-    const { preview, original, description, width = 360, height = 200 } = image;
-    const a = document.createElement(`a`);
-    a.classList.add(`gallery-link`);
-    a.href = original;
-    a.addEventListener(`click`, e => {
-        e.preventDefault();
-    });
-    li.appendChild(a);
-    img.classList.add(`gallery-image`)
-    img.src = preview;
-    img.alt = description;
-    img.dataset.source = original;
-    img.width = width;
-    img.height = height;
-    a.appendChild(img);
-});
+const galleryMarkup = images.map(({ preview, original, description }) => `
+  <li class="gallery-item">
+    <a class="gallery-link" href="${original}">
+      <img
+        class="gallery-image"
+        src="${preview}"
+        data-source="${original}"
+        alt="${description}"
+        width="360"
+        height="200"
+      />
+    </a>
+  </li>
+`).join('');
 
-galleryList.addEventListener(`click`, event => {
-    event.preventDefault();
-    const clickedImage = event.target;
-    if (clickedImage.classList.contains(`gallery-image`)) {
-        const largeImg = clickedImage.dataset.source;
-        console.log(largeImg);
-        const instance = basicLightbox.create(`<img src="${largeImg}" alt="${clickedImage.alt}"/>`);
-        instance.show();
-    }
-})
+galleryList.innerHTML = galleryMarkup;
+
+galleryList.addEventListener('click', event => {
+  event.preventDefault();
+  
+  const clickedImage = event.target.closest('.gallery-image');
+  if (!clickedImage) return;
+
+  const largeImg = clickedImage.dataset.source;
+  const instance = basicLightbox.create(`
+    <img src="${largeImg}" alt="${clickedImage.alt}" />
+  `);
+  instance.show();
+});
